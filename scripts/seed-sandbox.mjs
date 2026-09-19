@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseEnv } from 'node:util';
 
@@ -25,6 +25,15 @@ async function save(name, value) {
     { mode: 0o600 },
   );
   env[name] = value;
+}
+const customerEmail = env.NUXT_DEMO_EMAIL?.trim();
+if (
+  !env.NUXT_DEMO_CUSTOMER_ID &&
+  (!customerEmail || /@example\.(com|net|org)$/i.test(customerEmail))
+) {
+  throw new Error(
+    'Set NUXT_DEMO_EMAIL to an email you control. Bachs requires a deliverable email even in sandbox.',
+  );
 }
 const seedId = env.BACHS_DEMO_SEED_ID || randomUUID();
 await save('BACHS_DEMO_SEED_ID', seedId);
@@ -106,11 +115,11 @@ if (env.NUXT_DEMO_CUSTOMER_ID?.startsWith('cust_')) {
   const customer = await create(
     'customers',
     {
-      email: `bachs-vue-sandbox+${seedId}@example.com`,
+      email: customerEmail,
       name: 'Bachs Vue Sandbox Customer',
       metadata: { integration: 'bachs-vue', seed_id: seedId },
     },
-    'customer',
+    `customer_${createHash('sha256').update(customerEmail).digest('hex').slice(0, 16)}`,
   );
   if (
     typeof customer.customer_id !== 'string' ||

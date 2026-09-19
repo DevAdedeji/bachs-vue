@@ -25,7 +25,8 @@ cd bachs-vue
 npm ci
 npm run build
 cp examples/nuxt/.env.example examples/nuxt/.env
-# Fill in your Bachs sandbox key. Then create test products and a customer:
+# Fill in your sandbox key and NUXT_DEMO_EMAIL (an email you control).
+# Then create test products and a customer:
 npm run sandbox:seed
 npm run dev
 ```

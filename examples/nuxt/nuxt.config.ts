@@ -7,7 +7,7 @@ export default defineNuxtConfig({
       productId: '',
       subscriptionProductId: '',
       customerId: '',
-      email: 'buyer@example.com',
+      email: '',
       name: 'Sandbox Buyer',
     },
   },
