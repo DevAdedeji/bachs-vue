@@ -81,9 +81,9 @@ describe('Bachs server client', () => {
     expect(
       JSON.parse(fetch.mock.calls[0]![1]?.body as string).pricing.amount,
     ).toBe('12000.00');
-    // @ts-expect-error Numeric amounts must fail at compile time and runtime.
     await expect(
       client.createCheckout(
+        // @ts-expect-error Numeric amounts must fail at compile time and runtime.
         { pricing: { currency: 'NGN', amount: 12000 } },
         options,
       ),
@@ -114,17 +114,15 @@ describe('Bachs server client', () => {
     ).rejects.toThrow();
   });
   it('does not retry ambiguous failures or disclose provider detail and credentials', async () => {
-    const fetch = vi
-      .fn<typeof globalThis.fetch>()
-      .mockResolvedValue(
-        json(
-          {
-            error_code: 'SERVICE_UNAVAILABLE',
-            detail: 'secret sk_sandbox_test',
-          },
-          503,
-        ),
-      );
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      json(
+        {
+          error_code: 'SERVICE_UNAVAILABLE',
+          detail: 'secret sk_sandbox_test',
+        },
+        503,
+      ),
+    );
     const client = createBachsServer({ apiKey: 'sk_sandbox_test', fetch });
     const error = await client
       .createCheckout(input, options)
