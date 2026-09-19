@@ -4,12 +4,12 @@
 
 Returns a Vue plugin. Install once per application with `app.use(createBachs())`. Nuxt installs it for you. Initialization does not load remote scripts; the official SDK loads on the first checkout attempt.
 
-| Option           | Default                                   | Meaning                                                                                             |
-| ---------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `checkoutOrigin` | SDK default (`https://checkout.bachs.io`) | Trusted Bachs origin used to load the SDK. Set only if Bachs gives you a different checkout origin. |
-| `loadTimeoutMs`  | `15000`                                   | Browser SDK load timeout.                                                                           |
+| Option           | Default                                | Meaning                                                                                             |
+| ---------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `checkoutOrigin` | Inferred from the trusted checkout URL | Trusted Bachs origin used to load the SDK. Set only if Bachs gives you a different checkout origin. |
+| `loadTimeoutMs`  | `15000`                                | Browser SDK load timeout.                                                                           |
 
-The upstream SDK is a browser singleton. Configure a single checkout origin per page; do not mix environments/origins in multiple Vue apps on that page. The URL must match the SDK's configured origin. API key prefixes select the **server API** environment; they are never passed to this plugin.
+Without an override, only `https://checkout.bachs.io` and `https://sandbox-checkout.bachs.io` are accepted. The wrapper selects the SDK origin from the session URL and configures it before opening checkout. An explicit `checkoutOrigin` pins the allowed origin. The upstream SDK is a browser singleton, so initialize/manage it through this plugin rather than independently reconfiguring it elsewhere. API key prefixes select the **server API** environment; they are never passed to this plugin.
 
 ## `useBachsCheckout({ onEvent? }?)`
 

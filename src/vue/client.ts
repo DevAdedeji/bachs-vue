@@ -32,6 +32,12 @@ export interface BachsOptions {
 
 // The upstream SDK owns one overlay per browser, including across Vue apps.
 let overlayOwner: symbol | undefined;
+let initializedSdk: Bachs | undefined;
+let initializedOrigin: string | undefined;
+const checkoutOrigins = new Set([
+  'https://checkout.bachs.io',
+  'https://sandbox-checkout.bachs.io',
+]);
 
 export function createBachs(options: BachsOptions = {}) {
   const status = shallowRef<CheckoutStatus>('idle');
@@ -50,11 +56,11 @@ export function createBachs(options: BachsOptions = {}) {
     ? new URL(httpsUrl(options.checkoutOrigin)).origin
     : undefined;
 
-  async function load(): Promise<Bachs> {
+  async function load(origin: string): Promise<Bachs> {
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       return await Promise.race([
-        loadBachs(baseUrl ? { baseUrl } : undefined),
+        loadBachs({ baseUrl: origin }),
         new Promise<never>((_, reject) => {
           timer = setTimeout(
             () => reject(new Error('Bachs checkout failed to load in time.')),
@@ -102,10 +108,21 @@ export function createBachs(options: BachsOptions = {}) {
         typeof source === 'function' ? await source() : source,
       );
       if (attempt !== generation) return;
-      sdk = await load();
+      const origin = new URL(checkoutUrl).origin;
+      if (baseUrl ? origin !== baseUrl : !checkoutOrigins.has(origin)) {
+        throw new Error(
+          'Checkout URL must use a trusted Bachs checkout origin.',
+        );
+      }
+      sdk = await load(origin);
       if (attempt !== generation) return;
       if (sdk.Checkout.isOpen())
         throw new Error('A Bachs checkout is already open.');
+      if (initializedSdk !== sdk || initializedOrigin !== origin) {
+        sdk.Initialize({ baseUrl: origin });
+        initializedSdk = sdk;
+        initializedOrigin = origin;
+      }
       await sdk.Checkout.open({
         checkoutUrl,
         options: checkoutOptions,

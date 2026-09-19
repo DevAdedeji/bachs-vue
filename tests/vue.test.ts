@@ -44,6 +44,24 @@ afterEach(() => {
 });
 
 describe('Vue checkout', () => {
+  it('selects the official sandbox origin from the checkout URL', async () => {
+    const bachs = client();
+    await bachs.checkout.open('https://sandbox-checkout.bachs.io/c/test');
+    expect(loadBachs).toHaveBeenCalledWith({
+      baseUrl: 'https://sandbox-checkout.bachs.io',
+    });
+    expect(sdk.Initialize).toHaveBeenCalledWith({
+      baseUrl: 'https://sandbox-checkout.bachs.io',
+    });
+  });
+  it('rejects an unexpected checkout host before loading a remote script', async () => {
+    const bachs = client();
+    await expect(
+      bachs.checkout.open('https://attacker.example/c/test'),
+    ).rejects.toThrow('trusted Bachs');
+    expect(loadBachs).not.toHaveBeenCalled();
+  });
+
   it('loads lazily, prevents duplicate session creation, and shares busy state', async () => {
     const bachs = client();
     expect(loadBachs).not.toHaveBeenCalled();
