@@ -91,3 +91,5 @@ Read the webhook **before** any middleware parses/consumes its body. The helper 
 The runnable `examples/nuxt` app has a local, development-only sandbox route. Its `.env.example` names the additional `NUXT_DEMO_*` variables. Copy it to `examples/nuxt/.env`, supply your sandbox key and a deliverable email you control in `NUXT_DEMO_EMAIL`, run `npm run sandbox:seed` to create test products and a customer, and start with `npm run dev`. The seeder refuses live keys and persists its idempotency seed so interrupted runs can be retried. It creates a USD 5 one-time product, a USD 5 monthly product, and a test customer using that configured email. Bachs rejects non-deliverable example.com addresses even in sandbox. It preserves existing configured IDs.
 
 This demo is deliberately not a production authentication/fulfilment implementation. Production builds render the interface but reject its billing routes. Replace those routes with your own authenticated application routes before deployment.
+
+The local overlay example omits `success_url` and `cancel_url` because Bachs rejects loopback destinations. Use a publicly accessible HTTPS URL when testing redirect flows.

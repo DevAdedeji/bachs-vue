@@ -17,16 +17,15 @@ export default defineEventHandler(async (event) => {
       statusCode: 503,
       statusMessage: 'Configure the sandbox product ID first',
     });
-  const url = getRequestURL(event);
   try {
     const session = await useBachsServer(event).createCheckout(
       {
         product_cart: [{ product_id: productId, quantity: 1 }],
         customer: config.customerId
           ? { customer_id: config.customerId }
-          : { email: config.email, name: config.name },
-        success_url: `${url.origin}/?checkout=returned`,
-        cancel_url: url.origin,
+          : config.email && !/@example\.(com|net|org)$/i.test(config.email)
+            ? { email: config.email, name: config.name }
+            : undefined,
         reference: body.orderId,
       },
       { idempotencyKey: `demo_${body.plan}_${body.orderId}` },

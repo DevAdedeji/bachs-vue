@@ -9,14 +9,8 @@ const decimal = z
 const currency = z.string().regex(/^[A-Z]{3}$/);
 const redirectUrl = z.url().refine((value) => {
   const url = new URL(value);
-  return (
-    !url.username &&
-    !url.password &&
-    (url.protocol === 'https:' ||
-      (url.protocol === 'http:' &&
-        ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)))
-  );
-}, 'Use HTTPS, or HTTP on localhost for development.');
+  return url.protocol === 'https:' && !url.username && !url.password;
+}, 'Use a public HTTPS return URL. Omit redirects for local overlay testing.');
 const hostedUrl = z.string().refine((value) => {
   try {
     httpsUrl(value);

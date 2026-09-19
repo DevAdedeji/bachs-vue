@@ -57,7 +57,7 @@ describe('Bachs server client', () => {
     ).rejects.toThrow();
     await expect(
       client.createCheckout(
-        { ...input, success_url: 'javascript:alert(1)' },
+        { ...input, success_url: 'http://127.0.0.1:3000/thanks' },
         options,
       ),
     ).rejects.toThrow();

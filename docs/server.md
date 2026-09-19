@@ -20,7 +20,7 @@ Choose exactly one of:
 - `product_cart`: one to twenty catalog products, each with `product_id` and optional positive integer `quantity`, decimal `amount`, and ad-hoc `pricing`.
 - `pricing`: raw pricing containing a three-letter uppercase currency and a decimal string amount for fixed pricing, or `custom`/`free` pricing.
 
-Optional fields include `customer`, `customer_creation`, `billing_currency`, `payment_method_types`, `success_url`, `cancel_url`, `reference`, `expires_in_minutes`, and `metadata`. Types are exported as `CreateCheckoutInput`. Unknown input keys are rejected instead of silently discarded. HTTP return URLs are allowed only on localhost for development.
+Optional fields include `customer`, `customer_creation`, `billing_currency`, `payment_method_types`, `success_url`, `cancel_url`, `reference`, `expires_in_minutes`, and `metadata`. Types are exported as `CreateCheckoutInput`. Unknown input keys are rejected instead of silently discarded. Return URLs must use HTTPS. Bachs additionally requires publicly accessible destinations and rejects private/loopback addresses. Omit return URLs when testing the overlay on localhost.
 
 An existing customer uses `{ customer_id }`; a new customer uses `{ email, name, phone_number? }`. Subscription products require an identified customer. This library cannot know a product's billing configuration; Bachs enforces catalog-specific rules.
 
