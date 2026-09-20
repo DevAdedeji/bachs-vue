@@ -45,7 +45,10 @@ assert(
     (path) =>
       path.includes('.env') ||
       path.startsWith('tests/') ||
-      path.startsWith('examples/'),
+      path.startsWith('examples/') ||
+      path.startsWith('apps/') ||
+      path.includes('.vitepress/') ||
+      path.startsWith('docs/public/'),
   ),
 );
 assert((await readdir(new URL('../dist', import.meta.url))).length > 0);
