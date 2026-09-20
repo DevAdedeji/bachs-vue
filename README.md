@@ -31,7 +31,7 @@ npm run sandbox:seed
 npm run dev
 ```
 
-The Nuxt playground runs without credentials, but payment actions report a configuration error until you supply sandbox credentials. Its API routes work only in local development and reject live keys. It does not fulfil orders or grant access.
+The Nuxt playground runs without credentials, but payment actions report a configuration error until you supply sandbox credentials. Its API routes work only in local development and reject live keys. It does not fulfil orders or grant access. Subscription checkout requires a customer ID or deliverable customer email; the portal requires a customer ID. `sandbox:seed` creates these fixtures using an email you control.
 
 For the plain Vue example:
 

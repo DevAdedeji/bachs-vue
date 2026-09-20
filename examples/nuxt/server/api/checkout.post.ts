@@ -17,15 +17,22 @@ export default defineEventHandler(async (event) => {
       statusCode: 503,
       statusMessage: 'Configure the sandbox product ID first',
     });
+  const customer = config.customerId
+    ? { customer_id: config.customerId }
+    : config.email && !/@example\.(com|net|org)$/i.test(config.email)
+      ? { email: config.email, name: config.name }
+      : undefined;
+  if (body.plan === 'subscription' && !customer)
+    throw createError({
+      statusCode: 503,
+      statusMessage:
+        'Configure a sandbox customer ID or deliverable email for subscriptions',
+    });
   try {
     const session = await useBachsServer(event).createCheckout(
       {
         product_cart: [{ product_id: productId, quantity: 1 }],
-        customer: config.customerId
-          ? { customer_id: config.customerId }
-          : config.email && !/@example\.(com|net|org)$/i.test(config.email)
-            ? { email: config.email, name: config.name }
-            : undefined,
+        customer,
         reference: body.orderId,
       },
       { idempotencyKey: `demo_${body.plan}_${body.orderId}` },
