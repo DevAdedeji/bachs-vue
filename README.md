@@ -15,7 +15,7 @@ Vue composables, an accessible checkout button, and a Nuxt module for [Bachs](ht
 
 Version 0.1.0 is an initial community release. GitHub source and local tarball installation are available; the npm name is not published by this repository automatically. Once published, use `npm install bachs-vue`.
 
-ES modules only. Vue 3.5+, Nuxt 3.17+/4, and Node.js 22.12+ are the intended targets. The server entry uses Node crypto; this release targets Node server deployments, not edge runtimes.
+ES modules only. Vue 3.5+, Nuxt 3.17+/4, and Node.js 22.12+ are the intended targets. The server entry uses Node crypto; this release targets Node server deployments, not edge runtimes. Tested with Vue 3.5.43, Nuxt 3.21.11 and 4.5.2, and Node.js 24.14.1.
 
 ## Try it locally
 

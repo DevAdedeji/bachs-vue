@@ -6,7 +6,7 @@ Publishing is a deliberate manual step. This repository has no GitHub Actions wo
 2. Run `npm run test:consumer -- 4` and `npm run test:consumer -- 3`.
 3. Exercise an actual sandbox checkout, portal session, and signed webhook using credentials stored outside Git.
 4. Review `npm audit --omit=dev` and the packed file list from `npm pack --dry-run`.
-5. Update version, lockfile, changelog, and verification notes in a focused commit. Verify the Git author/committer and inspect staged changes.
+5. Update version, lockfile, and changelog in a focused commit. Verify the Git author/committer and inspect staged changes.
 6. Confirm you control the intended npm name/account. If the unscoped name is unavailable, choose a personal scope and update package metadata, imports, and examples before publishing.
 7. Run `npm pack` and inspect/install the resulting tarball. No credentials or examples should be included in the published archive.
 8. When ready, run `npm publish --access public` using your own npm authentication and required two-factor confirmation.
