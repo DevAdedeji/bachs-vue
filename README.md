@@ -4,6 +4,8 @@ Vue composables, an accessible checkout button, and a Nuxt module for [Bachs](ht
 
 **Community maintained by DevAdedeji. Not affiliated with or endorsed by Bachs.**
 
+[Documentation](https://bachs-vue.pages.dev) · [Sandbox playground](https://playground-production-39d2.up.railway.app) · [npm](https://www.npmjs.com/package/bachs-vue)
+
 - Lazy loading of the official `@bachs/js` checkout SDK.
 - Reactive checkout state, typed events, duplicate-open protection, and scoped event cleanup.
 - Nuxt auto-imports and private runtime configuration.

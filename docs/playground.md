@@ -2,7 +2,7 @@
 
 Try checkout without moving real money. The public playground demonstrates the published package's checkout overlay, subscription flow, event state, and customer portal.
 
-The hosted address will be added here after deployment.
+[Open the sandbox playground](https://playground-production-39d2.up.railway.app).
 
 ## Run the local example
 
