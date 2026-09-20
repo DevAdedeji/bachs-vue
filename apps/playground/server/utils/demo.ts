@@ -10,6 +10,7 @@ import { useRuntimeConfig } from '#imports';
 import { createBachsServer } from 'bachs-vue/server';
 import { DemoStore, DemoError, type Visitor } from '../../lib/store';
 import { assertOrigin, customerEmail } from '../../lib/policy';
+import { sandboxCustomerId } from '../../lib/customer';
 
 let storage: DemoStore | undefined;
 export function context(event: H3Event, mutation = false) {
@@ -112,14 +113,9 @@ export async function ensureCustomer(
       body: JSON.stringify({ email, name: 'Sandbox Visitor' }),
     });
     if (!response.ok) throw new Error('Customer unavailable');
-    const customer = await response.json();
-    if (
-      !/^cust_[A-Za-z0-9_-]+$/.test(customer.id) ||
-      customer.email?.toLowerCase() !== email.toLowerCase()
-    )
-      throw new Error('Invalid sandbox customer');
-    ctx.store.saveCustomer(visitor, customer.id);
-    return customer.id as string;
+    const customerId = sandboxCustomerId(await response.json(), email);
+    ctx.store.saveCustomer(visitor, customerId);
+    return customerId;
   } catch {
     ctx.store.releaseCustomer(visitor);
     throw createError({
