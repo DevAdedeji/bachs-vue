@@ -28,7 +28,7 @@ Call inside component setup. All consumers in one app share the checkout control
 
 `open()` rejects on server or SDK failures. Catch it and show a useful retry action. Duplicate opens in the same controller are ignored while busy; another app's active overlay causes a rejection. Do not call `open()` during SSR.
 
-The second argument accepts the official `showCloseButton` and `autoCloseOnComplete` options. A completed/failed/expired status is retained when the overlay closes. On a new attempt, errors and the previous event are cleared.
+The second argument accepts the official `showCloseButton` and `autoCloseOnComplete` options. A completed/failed/expired status is retained when the SDK closes the overlay, even if loading/readiness events arrive after the payment outcome. Callbacks from a closed overlay are ignored. On a new attempt, errors and the previous event are cleared.
 
 ```ts
 const checkout = useBachsCheckout({
