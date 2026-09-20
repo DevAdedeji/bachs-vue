@@ -99,6 +99,7 @@ export function createBachs(options: BachsOptions = {}) {
       throw new Error('Another Bachs checkout is already active.');
     overlayOwner = owner;
     const attempt = ++generation;
+    let closed = false;
     pending.value = true;
     error.value = null;
     lastEvent.value = null;
@@ -127,14 +128,15 @@ export function createBachs(options: BachsOptions = {}) {
         checkoutUrl,
         options: checkoutOptions,
         onEvent(event) {
-          if (attempt !== generation) return;
+          if (attempt !== generation || closed) return;
           lastEvent.value = event;
           switch (event.type) {
             case 'checkout.opened':
             case 'checkout.loaded':
             case 'checkout.ready':
               visible.value = true;
-              status.value = 'open';
+              if (status.value === 'loading' || status.value === 'open')
+                status.value = 'open';
               break;
             case 'checkout.completed':
               status.value = 'completed';
@@ -150,6 +152,7 @@ export function createBachs(options: BachsOptions = {}) {
               error.value = new Error('Bachs reported a checkout error.');
               break;
             case 'checkout.closed':
+              closed = true;
               visible.value = false;
               if (status.value === 'open' || status.value === 'loading')
                 status.value = 'closed';
@@ -168,13 +171,13 @@ export function createBachs(options: BachsOptions = {}) {
           }
         },
       });
-      if (attempt !== generation) return;
+      if (attempt !== generation || closed) return;
       visible.value = sdk.Checkout.isOpen();
       if (status.value === 'loading')
         status.value = visible.value ? 'open' : 'closed';
       if (!visible.value) release();
     } catch (cause) {
-      if (attempt !== generation) return;
+      if (attempt !== generation || closed) return;
       error.value = asError(cause);
       status.value = 'error';
       visible.value = false;

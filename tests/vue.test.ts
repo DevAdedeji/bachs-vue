@@ -89,6 +89,41 @@ describe('Vue checkout', () => {
     expect(bachs.checkout.status.value).toBe('completed');
     expect(bachs.checkout.isBusy.value).toBe(false);
   });
+  it.each(['completed', 'failed', 'expired'] as const)(
+    'retains %s when late readiness events arrive before closing',
+    async (outcome) => {
+      const bachs = client();
+      await bachs.checkout.open(url);
+      args?.onEvent?.({ type: `checkout.${outcome}`, data: {} });
+      for (const type of [
+        'checkout.loaded',
+        'checkout.ready',
+        'checkout.opened',
+      ] as const) {
+        args?.onEvent?.({ type, data: {} });
+        expect(bachs.checkout.status.value).toBe(outcome);
+      }
+      sdk.Checkout.close();
+      expect(bachs.checkout.status.value).toBe(outcome);
+      expect(bachs.checkout.isBusy.value).toBe(false);
+    },
+  );
+  it('ignores callbacks from a closed overlay and allows a new checkout', async () => {
+    const bachs = client();
+    const listener = vi.fn();
+    bachs.subscribe(listener);
+    await bachs.checkout.open(url);
+    const oldHandler = args?.onEvent;
+    sdk.Checkout.close();
+    listener.mockClear();
+    oldHandler?.({ type: 'checkout.loaded', data: {} });
+    expect(bachs.checkout.status.value).toBe('closed');
+    expect(bachs.checkout.isBusy.value).toBe(false);
+    expect(listener).not.toHaveBeenCalled();
+    await bachs.checkout.open(url);
+    oldHandler?.({ type: 'checkout.completed', data: {} });
+    expect(bachs.checkout.status.value).toBe('open');
+  });
   it('does not open a checkout after cancellation while the server responds', async () => {
     const bachs = client();
     let resolve!: (value: string) => void;
