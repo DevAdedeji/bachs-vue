@@ -55,16 +55,29 @@ await writeFile(
   join(directory, 'tsconfig.json'),
   '{"extends":"./.nuxt/tsconfig.json"}',
 );
-const component = `<script setup lang="ts">const { status } = useBachsCheckout();</script><template><main><h1>Packed consumer</h1><p>{{ status }}</p><BachsCheckoutButton checkout="https://checkout.bachs.io/c/example">Pay</BachsCheckoutButton></main></template>`;
+const component = `<script setup lang="ts">
+const { status } = useBachsCheckout();
+const { status: confirmationStatus, start } = useBachsPaymentConfirmation({
+  check: (reference, { signal }) => $fetch('/api/confirmation', { query: { reference }, signal }),
+});
+</script><template><main><h1>Packed consumer</h1><p>{{ status }}</p><p data-testid="confirmation-status">{{ confirmationStatus }}</p><button @click="start('order_fixture')">Check payment</button><BachsCheckoutButton checkout="https://checkout.bachs.io/c/example">Pay</BachsCheckoutButton></main></template>`;
 await writeFile(join(directory, 'app.vue'), component);
 await writeFile(join(directory, 'app/app.vue'), component);
 await writeFile(
   join(directory, 'server/api/config.get.ts'),
-  `export default defineEventHandler(event => ({ configured: typeof useBachsServer(event).createCheckout === 'function' }));`,
+  `export default defineEventHandler(event => ({ configured: typeof useBachsServer(event).createCheckout === 'function' && typeof useBachsServer(event).getCheckoutSession === 'function' }));`,
 );
 await writeFile(
   join(directory, 'server/api/webhook.post.ts'),
   `export default defineEventHandler(event => readBachsWebhook(event));`,
+);
+await writeFile(
+  join(directory, 'server/api/confirmation.get.ts'),
+  `import type { PaymentConfirmationResult } from 'bachs-vue';
+export default defineEventHandler((event): PaymentConfirmationResult => {
+  if (getQuery(event).reference !== 'order_fixture') throw createError({ statusCode: 404 });
+  return { status: 'confirmed' };
+});`,
 );
 await run('npx', ['--no-install', 'nuxt', 'typecheck']);
 await run('npx', ['--no-install', 'nuxt', 'build']);
@@ -117,6 +130,20 @@ try {
     !html.includes(key) && !html.includes(secret),
     'Secret leaked into SSR HTML.',
   );
+  assert(
+    html.includes('data-testid="confirmation-status">idle'),
+    'Confirmation must remain idle during SSR.',
+  );
+  assert.deepEqual(
+    await (
+      await fetch(`${origin}/api/confirmation?reference=order_fixture`)
+    ).json(),
+    { status: 'confirmed' },
+  );
+  assert.equal(
+    (await fetch(`${origin}/api/confirmation?reference=unowned`)).status,
+    404,
+  );
   assert.deepEqual(await (await fetch(`${origin}/api/config`)).json(), {
     configured: true,
   });
@@ -160,7 +187,7 @@ try {
     await readFile(join(directory, 'node_modules/nuxt/package.json'), 'utf8'),
   );
   console.log(
-    `PASS: installed tarball, Nuxt ${nuxt.version} typecheck/build, SSR, private configuration, valid/invalid webhooks, and public asset secret scan.`,
+    `PASS: installed tarball, Nuxt ${nuxt.version} typecheck/build, SSR and confirmation auto-imports, application confirmation endpoint, checkout retrieval export, private configuration, valid/invalid webhooks, and public asset secret scan.`,
   );
 } finally {
   server.kill('SIGTERM');

@@ -169,20 +169,18 @@ describe('checkout retrieval', () => {
   it.each([403, 404, 429, 503])(
     'preserves HTTP %i errors without leaking or retrying',
     async (status) => {
-      const fetch = vi
-        .fn<typeof globalThis.fetch>()
-        .mockResolvedValue(
-          new Response(
-            JSON.stringify({
-              error_code: 'PROVIDER_ERROR',
-              detail: 'private provider data',
-            }),
-            {
-              status,
-              headers: { 'x-request-id': 'req_test', 'retry-after': '5' },
-            },
-          ),
-        );
+      const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            error_code: 'PROVIDER_ERROR',
+            detail: 'private provider data',
+          }),
+          {
+            status,
+            headers: { 'x-request-id': 'req_test', 'retry-after': '5' },
+          },
+        ),
+      );
       const error = await createBachsServer({
         apiKey: 'sk_sandbox_test',
         fetch,

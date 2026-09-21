@@ -67,8 +67,65 @@ Returns `open(source)`, readonly `isLoading`, and readonly `error`. Call `open()
 
 The returned URL must be HTTPS with no embedded username/password. Supply it only from your own authenticated backend; URL validation does not establish customer ownership. Portal URLs themselves carry credentials and must not be logged, cached, or shared.
 
+## `useBachsPaymentConfirmation(options)` (unreleased) {#usebachspaymentconfirmationoptions}
+
+Show the difference between checkout finishing and your server confirming the order. This composable calls your own endpoint; it does not verify a payment, process webhooks, create orders, or grant access. No Bachs plugin is required for this composable alone.
+
+```vue
+<script setup lang="ts">
+import { watch } from 'vue';
+import {
+  useBachsPaymentConfirmation,
+  type PaymentConfirmationResult,
+} from 'bachs-vue';
+
+const props = defineProps<{ orderId: string }>();
+const { status, start, stop, isChecking } = useBachsPaymentConfirmation({
+  async check(orderId, { signal }) {
+    const response = await fetch(
+      `/api/billing/orders/${encodeURIComponent(orderId)}/confirmation`,
+      { signal, credentials: 'same-origin', cache: 'no-store' },
+    );
+    if (!response.ok) throw new Error('Could not check payment.');
+    return (await response.json()) as PaymentConfirmationResult;
+  },
+});
+watch(() => props.orderId, stop, { flush: 'sync' });
+// Call start(theOrderId) after that order's checkout completion event,
+// or when its confirmation page mounts. This example also allows manual checks.
+</script>
+
+<template>
+  <p aria-live="polite">Payment confirmation: {{ status }}</p>
+  <button :disabled="isChecking" @click="start(orderId)">Check again</button>
+</template>
+```
+
+The endpoint must authenticate the caller, authorize the order, and return `{ status: 'pending' | 'confirmed' | 'failed' }` based on durable application state. The composable checks the returned status at runtime; a raw Bachs response or a browser event is not this contract. Use `confirmed` only after server verification and the necessary application updates. Treat ongoing processing as `pending`, and reserve `failed` for a failure established by your backend. Authentication/transport errors should use an appropriate HTTP error.
+
+| Option                         | Default  | Meaning                                                                                    |
+| ------------------------------ | -------- | ------------------------------------------------------------------------------------------ |
+| `check(reference, { signal })` | Required | Query your endpoint using the captured order reference. Forward the abort signal to fetch. |
+| `intervalMs`                   | `2000`   | Delay after a pending response; checks never overlap within one run.                       |
+| `maxAttempts`                  | `10`     | Maximum checks per run, including the first.                                               |
+| `timeoutMs`                    | `30000`  | Total deadline, including a stalled request.                                               |
+
+| Member             | Meaning                                                                                                                                                                    |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `start(reference)` | Starts immediately; resolves when polling stops. Same-reference clicks share an active run. A different reference cancels the previous run. Call again for a manual retry. |
+| `stop()`           | Cancels work and resets state to `idle`. Call on logout, account changes, or navigation that keeps the component alive.                                                    |
+| `status`           | Readonly ref: `idle`, `pending`, `confirmed`, `failed`, `timeout`, or `error`.                                                                                             |
+| `isChecking`       | Readonly computed ref; true while pending.                                                                                                                                 |
+| `attempts`         | Readonly count of checks started in the current run.                                                                                                                       |
+| `reference`        | Readonly current order reference, or null after reset.                                                                                                                     |
+| `error`            | Readonly endpoint/check error, or null. Display a suitable application message.                                                                                            |
+
+Pending responses are retried within both limits. A rejected check or malformed result stops immediately with `error`; it is not automatically retried. `timeout` means confirmation is still unknown, not that payment failed. Normal polling failures are exposed in state rather than rejected from `start()`; invalid references and starting during SSR reject before any request.
+
+Call in component setup. Nothing starts automatically or during SSR. Unmounting cancels timers and requests; late responses are ignored even if the checker ignores cancellation. Calls after scope disposal do nothing. Outside a Vue scope, the caller must call `stop()` itself. Capture the order ID that owns the checkout rather than reading an unrelated current selection in an event callback.
+
 ## Exported types
 
-`BachsOptions`, `BachsClient`, `CheckoutSource`, `CheckoutStatus`, `BachsCheckoutEvent`, and `BachsCheckoutOpenOptions`.
+`BachsOptions`, `BachsClient`, `CheckoutSource`, `CheckoutStatus`, `BachsCheckoutEvent`, and `BachsCheckoutOpenOptions`. The unreleased confirmation API adds `PaymentConfirmationOptions`, `PaymentConfirmationResult`, and `PaymentConfirmationStatus`.
 
 [Official Bachs overlay contract](https://docs.bachs.io/guides/checkout/overlay-checkout)
