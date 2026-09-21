@@ -2,8 +2,7 @@ import { defineConfig } from 'vitepress';
 
 export default defineConfig({
   title: 'bachs-vue',
-  description:
-    'Bachs checkout and billing for Vue and Nuxt. A community integration by DevAdedeji.',
+  description: 'Bachs checkout and billing for Vue and Nuxt.',
   cleanUrls: true,
   lastUpdated: false,
   head: [
@@ -62,8 +61,7 @@ export default defineConfig({
       text: 'Improve this page',
     },
     footer: {
-      message:
-        'Community maintained. Not affiliated with or endorsed by Bachs. Released under the MIT License.',
+      message: 'Released under the MIT License.',
       copyright: 'Copyright © 2026 DevAdedeji',
     },
   },
