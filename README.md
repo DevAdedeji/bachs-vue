@@ -2,8 +2,6 @@
 
 Vue composables, an accessible checkout button, and a Nuxt module for [Bachs](https://bachs.io) billing.
 
-**Community maintained by DevAdedeji. Not affiliated with or endorsed by Bachs.**
-
 [Documentation](https://bachs-vue.pages.dev) · [Sandbox playground](https://playground-production-39d2.up.railway.app) · [npm](https://www.npmjs.com/package/bachs-vue)
 
 - Lazy loading of the official `@bachs/js` checkout SDK.

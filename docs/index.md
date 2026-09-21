@@ -31,6 +31,6 @@ features:
 npm install bachs-vue
 ```
 
-A community integration by **DevAdedeji**. MIT licensed. Not affiliated with or endorsed by Bachs.
+MIT licensed.
 
 </div>
