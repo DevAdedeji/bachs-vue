@@ -9,7 +9,7 @@ export default defineNuxtConfig({
 
 The plugin is registered during SSR and hydration, but loads the browser SDK only when `open()` is called. State is created per Nuxt app, not shared between SSR requests.
 
-The unreleased main branch also auto-imports `useBachsPaymentConfirmation`; see the [confirmation API](./vue.md#usebachspaymentconfirmationoptions).
+Version 0.2.0 also auto-imports `useBachsPaymentConfirmation`; see the [confirmation API](./vue.md#usebachspaymentconfirmationoptions).
 
 Client auto-imports: `useBachsCheckout`, `useBachsPortal`, and (unless `components: false`) `BachsCheckoutButton`.
 
@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
 
 Derive product, quantity, customer, and return origin from trusted server state. Never pass an arbitrary browser body directly to `createCheckout()`. Persist the order/idempotency key before calling Bachs; if the network response is lost, retry that same logical operation with the same key. Avoid using unvalidated Host headers to construct production return URLs.
 
-## Confirmation endpoint (unreleased composable)
+## Confirmation endpoint
 
 The endpoint below reads the state your webhook/reconciliation handler has already persisted. The authentication, order lookup, and business status names are illustrative application functions, not package exports.
 

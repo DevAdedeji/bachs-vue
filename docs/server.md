@@ -24,11 +24,11 @@ Optional fields include `customer`, `customer_creation`, `billing_currency`, `pa
 
 An existing customer uses `{ customer_id }`; a new customer uses `{ email, name, phone_number? }`. Subscription products require an identified customer. This library cannot know a product's billing configuration; Bachs enforces catalog-specific rules.
 
-Amounts remain strings throughout. Currency precision, minimum amounts, allowed methods, and catalog eligibility are validated by Bachs. Saved-card setup and connected-account management are outside this helper. Destination split fields described below are unreleased additions.
+Amounts remain strings throughout. Currency precision, minimum amounts, allowed methods, and catalog eligibility are validated by Bachs. Saved-card setup and connected-account management are outside this helper. Destination split fields and checkout retrieval are available since 0.2.0.
 
 Returns `CheckoutSession`, preserving additive response fields. Consumers should return only `checkout_url` to the browser.
 
-### Destination split checkout (unreleased)
+### Destination split checkout
 
 Choose either the platform's fee or the seller's amount. Both are decimal strings in the sale's base currency, not percentages or minor units:
 
@@ -48,7 +48,7 @@ Alternatively, omit `platform_fee` and send `transfer_data: { destination: autho
 
 Derive the recipient and split from authorized server records. Check the connected account's current eligibility before offering paid bookings. Bachs validates account ownership, eligibility, currency precision, and whether the split fits the final total. The helper does not transfer funds separately, calculate fees, or perform payout onboarding. Processing fees and settlement rules still apply. Do not accept recipient IDs or fees directly from the browser.
 
-### `getCheckoutSession(checkoutId)` (unreleased)
+### `getCheckoutSession(checkoutId)`
 
 Retrieve a checkout through an authenticated, bodyless GET. Use the `checkout_id` returned by creation and stored with your order, not the short token in `checkout_url`. Requires a Bachs key with `payments:read` permission.
 

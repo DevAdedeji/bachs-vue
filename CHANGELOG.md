@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-09-21
 
 - Add bounded, cancellable payment confirmation through an application-owned endpoint, including manual retries and protection against stale order responses.
 - Auto-import `useBachsPaymentConfirmation` in Nuxt and export its public types for Vue.

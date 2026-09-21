@@ -67,7 +67,7 @@ Returns `open(source)`, readonly `isLoading`, and readonly `error`. Call `open()
 
 The returned URL must be HTTPS with no embedded username/password. Supply it only from your own authenticated backend; URL validation does not establish customer ownership. Portal URLs themselves carry credentials and must not be logged, cached, or shared.
 
-## `useBachsPaymentConfirmation(options)` (unreleased) {#usebachspaymentconfirmationoptions}
+## `useBachsPaymentConfirmation(options)` {#usebachspaymentconfirmationoptions}
 
 Show the difference between checkout finishing and your server confirming the order. This composable calls your own endpoint; it does not verify a payment, process webhooks, create orders, or grant access. No Bachs plugin is required for this composable alone.
 
@@ -126,6 +126,6 @@ Call in component setup. Nothing starts automatically or during SSR. Unmounting 
 
 ## Exported types
 
-`BachsOptions`, `BachsClient`, `CheckoutSource`, `CheckoutStatus`, `BachsCheckoutEvent`, and `BachsCheckoutOpenOptions`. The unreleased confirmation API adds `PaymentConfirmationOptions`, `PaymentConfirmationResult`, and `PaymentConfirmationStatus`.
+`BachsOptions`, `BachsClient`, `CheckoutSource`, `CheckoutStatus`, `BachsCheckoutEvent`, and `BachsCheckoutOpenOptions`. Since 0.2.0, the confirmation API adds `PaymentConfirmationOptions`, `PaymentConfirmationResult`, and `PaymentConfirmationStatus`.
 
 [Official Bachs overlay contract](https://docs.bachs.io/guides/checkout/overlay-checkout)

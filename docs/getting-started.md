@@ -10,7 +10,7 @@ npm install bachs-vue
 
 Supports Vue 3.5+, Nuxt 3.17+/4, and Node.js 22.12+. The package is ESM-only. Server helpers target Node.js rather than edge runtimes.
 
-Version 0.1.0 was tested with Vue 3.5.43, Nuxt 3.21.11 and 4.5.2, and Node.js 24.14.1. It is an initial community release, not an official Bachs SDK.
+Version 0.2.0 was tested with Vue 3.5.43, Nuxt 3.21.11 and 4.5.2, and Node.js 24.14.1. It is a community release, not an official Bachs SDK.
 
 ## Nuxt
 
@@ -71,6 +71,6 @@ Browser completion events update the interface. They do not prove payment or gra
 
 ## Scope
 
-The server helpers cover checkout creation, customer portal sessions, and webhook verification. Recurring products start subscriptions through checkout. Refunds, payouts, Connect transfers, product management, and subscription changes require Bachs APIs outside this package.
+The server helpers cover checkout creation with optional destination splits, checkout retrieval, customer portal sessions, and webhook verification. Recurring products start subscriptions through checkout. Refunds, payouts, Connect transfers, product management, and subscription changes require Bachs APIs outside this package.
 
 Your application owns authentication, customer ownership, pricing, rate limiting, durable webhook deduplication, and fulfilment.

@@ -1,6 +1,6 @@
 {
   "name": "bachs-vue",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Community Vue composables and Nuxt module for Bachs checkout and billing.",
   "type": "module",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "type": "git",
     "url": "git+https://github.com/DevAdedeji/bachs-vue.git"
   },
-  "homepage": "https://github.com/DevAdedeji/bachs-vue#readme",
+  "homepage": "https://bachs-vue.pages.dev",
   "bugs": {
     "url": "https://github.com/DevAdedeji/bachs-vue/issues"
   },

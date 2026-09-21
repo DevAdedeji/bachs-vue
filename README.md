@@ -9,13 +9,14 @@ Vue composables, an accessible checkout button, and a Nuxt module for [Bachs](ht
 - Lazy loading of the official `@bachs/js` checkout SDK.
 - Reactive checkout state, typed events, duplicate-open protection, and scoped event cleanup.
 - Nuxt auto-imports and private runtime configuration.
-- Server helpers for checkout and customer portal sessions.
+- Server helpers for split-payment checkout, checkout retrieval, and customer portal sessions.
+- Bounded payment confirmation through application-owned endpoints.
 - Raw-body webhook verification, including V2 signatures and secret rotation.
 - Runnable Vue and Nuxt examples, TypeScript declarations, and automated tests.
 
 ## Status and compatibility
 
-Version 0.1.0 is an initial community release. Install it from npm:
+Version 0.2.0 is a community release. Install it from npm:
 
 ```sh
 npm install bachs-vue
@@ -23,9 +24,9 @@ npm install bachs-vue
 
 ES modules only. Vue 3.5+, Nuxt 3.17+/4, and Node.js 22.12+ are the intended targets. The server entry uses Node crypto; this release targets Node server deployments, not edge runtimes. Tested with Vue 3.5.43, Nuxt 3.21.11 and 4.5.2, and Node.js 24.14.1.
 
-### Next release (unreleased)
+### New in 0.2.0
 
-The main branch also includes [payment confirmation](docs/vue.md#usebachspaymentconfirmationoptions), [split-payment checkout and checkout retrieval](docs/server.md). These additions are not available in npm version 0.1.0 yet. They keep payment verification, fee decisions, and customer authorization in your application.
+Version 0.2.0 adds [payment confirmation](docs/vue.md#usebachspaymentconfirmationoptions), [split-payment checkout and checkout retrieval](docs/server.md). These helpers keep payment verification, fee decisions, and customer authorization in your application.
 
 ## Try it locally
 
@@ -57,7 +58,7 @@ To test a local package build in another project:
 # In this repository:
 npm pack
 # In your application, using the actual path to that file:
-npm install /path/to/bachs-vue-0.1.0.tgz
+npm install /path/to/bachs-vue-0.2.0.tgz
 ```
 
 ## Nuxt quick start
@@ -169,7 +170,7 @@ const session = await bachs.createPortalSession(customerId);
 // Return session.url only to that customer. Do not log this credential-bearing URL.
 ```
 
-The v0.1 server surface covers checkout creation and portal sessions. Subscriptions start through recurring products at checkout; the hosted portal handles customer self-service. This is not a complete replacement for Bachs' REST API. Connect splits, refunds, payouts, and saved-card setup are outside this version's scope.
+The server helpers cover checkout creation, destination splits, checkout retrieval, and portal sessions. Subscriptions start through recurring products at checkout; the hosted portal handles customer self-service. This is not a complete replacement for Bachs' REST API. Connected-account onboarding, standalone transfers, refunds, payouts, and saved-card setup remain outside this version's scope.
 
 ## Payment confirmation
 
