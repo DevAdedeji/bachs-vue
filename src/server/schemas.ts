@@ -52,7 +52,13 @@ const customer = z.union([
     phone_number: z.string().optional(),
   }),
 ]);
+const transferData = z.strictObject({
+  destination: id('acct'),
+  amount: decimal.optional(),
+});
 const common = {
+  platform_fee: decimal.optional(),
+  transfer_data: transferData.optional(),
   customer: customer.optional(),
   customer_creation: z.enum(['always', 'if_required']).optional(),
   billing_currency: currency.optional(),
@@ -71,23 +77,37 @@ const common = {
     )
     .optional(),
 };
-export const checkoutInputSchema = z.union([
-  z.strictObject({
-    ...common,
-    product_cart: z
-      .array(
-        z.strictObject({
-          product_id: id('prod'),
-          quantity: z.number().int().positive().optional(),
-          amount: decimal.optional(),
-          pricing: price.optional(),
-        }),
-      )
-      .min(1)
-      .max(20),
-  }),
-  z.strictObject({ ...common, pricing: rawPrice }),
-]);
+export const checkoutInputSchema = z
+  .union([
+    z.strictObject({
+      ...common,
+      product_cart: z
+        .array(
+          z.strictObject({
+            product_id: id('prod'),
+            quantity: z.number().int().positive().optional(),
+            amount: decimal.optional(),
+            pricing: price.optional(),
+          }),
+        )
+        .min(1)
+        .max(20),
+    }),
+    z.strictObject({ ...common, pricing: rawPrice }),
+  ])
+  .superRefine((value, ctx) => {
+    if (!value.transfer_data) return;
+    const hasFee = value.platform_fee !== undefined;
+    const hasAmount = value.transfer_data.amount !== undefined;
+    if (hasFee === hasAmount) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['transfer_data'],
+        message:
+          'A destination checkout requires exactly one of platform_fee or transfer_data.amount.',
+      });
+    }
+  });
 export const checkoutSessionSchema = z.looseObject({
   checkout_id: z.string().min(1),
   checkout_url: hostedUrl,
@@ -95,6 +115,44 @@ export const checkoutSessionSchema = z.looseObject({
   expires_at: z.string().optional(),
   created_at: z.string().optional(),
   reference: z.string().nullable().optional(),
+});
+// Retrieval returns payment details rather than the URL returned by creation.
+export const checkoutIdSchema = z
+  .string()
+  .min(1)
+  .max(255)
+  .regex(/^[A-Za-z0-9_-]+$/);
+export const checkoutDetailsSchema = z.looseObject({
+  checkout_id: checkoutIdSchema,
+  status: z.string().min(1),
+  payment_status: z.string().min(1).nullable().optional(),
+  amount: decimal,
+  currency,
+  reference: z.string().nullable().optional(),
+  customer: z
+    .looseObject({
+      id: id('cust').nullable().optional(),
+      email: z.string().nullable().optional(),
+      name: z.string().nullable().optional(),
+    })
+    .nullable(),
+  charge: z
+    .looseObject({
+      payment_id: id('pay'),
+      status: z.string().min(1),
+      amount: decimal,
+      currency,
+    })
+    .nullable()
+    .optional(),
+  platform_fee: decimal.nullable().optional(),
+  destination_amount: decimal.nullable().optional(),
+  billing_currency: currency.nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).nullable().optional(),
+  created_at: z.string().min(1),
+  updated_at: z.string().min(1),
+  expires_at: z.string().nullable().optional(),
+  completed_at: z.string().nullable().optional(),
 });
 export const portalSessionSchema = z.looseObject({
   id: z.string().min(1),
@@ -113,3 +171,5 @@ export type CreateCheckoutInput = z.input<typeof checkoutInputSchema>;
 export type CheckoutSession = z.output<typeof checkoutSessionSchema>;
 export type PortalSession = z.output<typeof portalSessionSchema>;
 export type BachsWebhookEvent = z.output<typeof webhookEventSchema>;
+
+export type CheckoutDetails = z.output<typeof checkoutDetailsSchema>;

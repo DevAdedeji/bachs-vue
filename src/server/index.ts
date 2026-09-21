@@ -13,6 +13,7 @@ export {
 export type {
   CreateCheckoutInput,
   CheckoutSession,
+  CheckoutDetails,
   PortalSession,
   BachsWebhookEvent,
 } from './schemas';
