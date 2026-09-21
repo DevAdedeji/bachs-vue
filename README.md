@@ -14,7 +14,7 @@ Vue composables, an accessible checkout button, and a Nuxt module for [Bachs](ht
 
 ## Status and compatibility
 
-Version 0.2.0 is a community release. Install it from npm:
+Install version 0.2.1 from npm:
 
 ```sh
 npm install bachs-vue
@@ -56,7 +56,7 @@ To test a local package build in another project:
 # In this repository:
 npm pack
 # In your application, using the actual path to that file:
-npm install /path/to/bachs-vue-0.2.0.tgz
+npm install /path/to/bachs-vue-0.2.1.tgz
 ```
 
 ## Nuxt quick start

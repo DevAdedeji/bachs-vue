@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 — 2026-09-21
+
+- Remove the community attribution notice from the README and documentation homepage.
+
 ## 0.2.0 — 2026-09-21
 
 - Add bounded, cancellable payment confirmation through an application-owned endpoint, including manual retries and protection against stale order responses.

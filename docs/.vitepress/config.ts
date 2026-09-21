@@ -15,7 +15,7 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/getting-started' },
       { text: 'Playground', link: '/playground' },
-      { text: 'v0.2.0', link: 'https://www.npmjs.com/package/bachs-vue' },
+      { text: 'v0.2.1', link: 'https://www.npmjs.com/package/bachs-vue' },
     ],
     sidebar: [
       {

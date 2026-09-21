@@ -1,6 +1,6 @@
 {
   "name": "bachs-vue",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Community Vue composables and Nuxt module for Bachs checkout and billing.",
   "type": "module",
   "license": "MIT",
