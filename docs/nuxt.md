@@ -9,6 +9,8 @@ export default defineNuxtConfig({
 
 The plugin is registered during SSR and hydration, but loads the browser SDK only when `open()` is called. State is created per Nuxt app, not shared between SSR requests.
 
+The unreleased main branch also auto-imports `useBachsPaymentConfirmation`; see the [confirmation API](./vue.md#usebachspaymentconfirmationoptions).
+
 Client auto-imports: `useBachsCheckout`, `useBachsPortal`, and (unless `components: false`) `BachsCheckoutButton`.
 
 Server auto-imports: `useBachsServer(event)` and `readBachsWebhook(event)`.
@@ -53,6 +55,41 @@ export default defineEventHandler(async (event) => {
 ```
 
 Derive product, quantity, customer, and return origin from trusted server state. Never pass an arbitrary browser body directly to `createCheckout()`. Persist the order/idempotency key before calling Bachs; if the network response is lost, retry that same logical operation with the same key. Avoid using unvalidated Host headers to construct production return URLs.
+
+## Confirmation endpoint (unreleased composable)
+
+The endpoint below reads the state your webhook/reconciliation handler has already persisted. The authentication, order lookup, and business status names are illustrative application functions, not package exports.
+
+```ts
+// server/api/billing/orders/[orderId]/confirmation.get.ts
+import type { PaymentConfirmationResult } from 'bachs-vue';
+
+export default defineEventHandler(
+  async (event): Promise<PaymentConfirmationResult> => {
+    setResponseHeader(event, 'Cache-Control', 'no-store');
+    const user = await requireUser(event);
+    await rateLimitBilling(user.id);
+    const orderId = await validateOrderId(event);
+    const order = await requireOwnedOrder(user.id, orderId);
+    if (order.fulfilmentStatus === 'fulfilled') return { status: 'confirmed' };
+    if (order.paymentStatus === 'failed') return { status: 'failed' };
+    return { status: 'pending' };
+  },
+);
+```
+
+In a component, pass a check function that forwards both the captured order ID and abort signal:
+
+```ts
+const confirmation = useBachsPaymentConfirmation({
+  check: (orderId, { signal }) =>
+    $fetch(`/api/billing/orders/${encodeURIComponent(orderId)}/confirmation`, {
+      signal,
+    }),
+});
+```
+
+Start with `confirmation.start(orderId)` after the relevant checkout finishes. Stop on logout or order changes; unmount cleanup is automatic. Use `useBachsServer(event).getCheckoutSession(order.bachsCheckoutId)` in your authorized server reconciliation flow when provider retrieval is needed. Keep polling endpoints lightweight, rate limited, and free of financial mutations.
 
 ## Customer portal
 

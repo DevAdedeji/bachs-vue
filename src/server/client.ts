@@ -1,11 +1,14 @@
 import { z } from 'zod';
 import {
   checkoutInputSchema,
+  checkoutIdSchema,
+  checkoutDetailsSchema,
   checkoutSessionSchema,
   customerIdSchema,
   portalSessionSchema,
   type CreateCheckoutInput,
   type CheckoutSession,
+  type CheckoutDetails,
   type PortalSession,
 } from './schemas';
 
@@ -53,6 +56,7 @@ export function createBachsServer(options: BachsServerOptions) {
   async function request<T>(
     path: string,
     schema: z.ZodType<T>,
+    method: 'GET' | 'POST',
     body?: unknown,
     idempotencyKey?: string,
   ): Promise<T> {
@@ -66,7 +70,7 @@ export function createBachsServer(options: BachsServerOptions) {
       if (body !== undefined) headers['Content-Type'] = 'application/json';
       if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
       const response = await transport(`${origin}${path}`, {
-        method: 'POST',
+        method,
         headers,
         signal: controller.signal,
         redirect: 'error',
@@ -121,8 +125,17 @@ export function createBachsServer(options: BachsServerOptions) {
       return request(
         '/v1/checkout-sessions',
         checkoutSessionSchema,
+        'POST',
         payload,
         key,
+      );
+    },
+    async getCheckoutSession(checkoutId: string): Promise<CheckoutDetails> {
+      const id = checkoutIdSchema.parse(checkoutId);
+      return request(
+        `/v1/checkout-sessions/${encodeURIComponent(id)}`,
+        checkoutDetailsSchema.refine((session) => session.checkout_id === id),
+        'GET',
       );
     },
     async createPortalSession(customerId: string): Promise<PortalSession> {
@@ -130,6 +143,7 @@ export function createBachsServer(options: BachsServerOptions) {
       return request(
         `/v1/customers/${encodeURIComponent(id)}/portal-sessions`,
         portalSessionSchema,
+        'POST',
       );
     },
   };

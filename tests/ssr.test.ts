@@ -25,3 +25,14 @@ it('renders on the server without loading browser scripts or sharing request sta
   first.checkout.close();
   expect(second.checkout.status.value).toBe('idle');
 });
+
+it('does not poll during SSR or share payment confirmation state', async () => {
+  const { useBachsPaymentConfirmation } = await import('../src');
+  const check = vi.fn();
+  const confirmation = useBachsPaymentConfirmation({ check });
+  const other = useBachsPaymentConfirmation({ check });
+  await expect(confirmation.start('order_1')).rejects.toThrow('SSR');
+  expect(check).not.toHaveBeenCalled();
+  expect(confirmation.status.value).toBe('idle');
+  expect(other.status.value).toBe('idle');
+});

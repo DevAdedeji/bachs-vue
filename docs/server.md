@@ -24,9 +24,42 @@ Optional fields include `customer`, `customer_creation`, `billing_currency`, `pa
 
 An existing customer uses `{ customer_id }`; a new customer uses `{ email, name, phone_number? }`. Subscription products require an identified customer. This library cannot know a product's billing configuration; Bachs enforces catalog-specific rules.
 
-Amounts remain strings throughout. Currency precision, minimum amounts, allowed methods, and catalog eligibility are validated by Bachs. This version does not expose Connect splits or saved-card setup.
+Amounts remain strings throughout. Currency precision, minimum amounts, allowed methods, and catalog eligibility are validated by Bachs. Saved-card setup and connected-account management are outside this helper. Destination split fields described below are unreleased additions.
 
 Returns `CheckoutSession`, preserving additive response fields. Consumers should return only `checkout_url` to the browser.
+
+### Destination split checkout (unreleased)
+
+Choose either the platform's fee or the seller's amount. Both are decimal strings in the sale's base currency, not percentages or minor units:
+
+```ts
+const session = await client.createCheckout(
+  {
+    pricing: { currency: 'USD', amount: '50.00' },
+    platform_fee: '1.25',
+    transfer_data: { destination: authorizedHost.bachsAccountId },
+    reference: order.id,
+  },
+  { idempotencyKey: order.checkoutIdempotencyKey },
+);
+```
+
+Alternatively, omit `platform_fee` and send `transfer_data: { destination: authorizedHost.bachsAccountId, amount: '48.75' }`. These fields also work with catalog `product_cart` checkout. A destination requires exactly one split term; supplying neither or both is rejected before transport. A zero platform fee must be explicit, for example `'0.00'`.
+
+Derive the recipient and split from authorized server records. Check the connected account's current eligibility before offering paid bookings. Bachs validates account ownership, eligibility, currency precision, and whether the split fits the final total. The helper does not transfer funds separately, calculate fees, or perform payout onboarding. Processing fees and settlement rules still apply. Do not accept recipient IDs or fees directly from the browser.
+
+### `getCheckoutSession(checkoutId)` (unreleased)
+
+Retrieve a checkout through an authenticated, bodyless GET. Use the `checkout_id` returned by creation and stored with your order, not the short token in `checkout_url`. Requires a Bachs key with `payments:read` permission.
+
+```ts
+// Authenticate the caller and authorize this order before retrieving it.
+const session = await client.getCheckoutSession(order.bachsCheckoutId);
+```
+
+Returns `CheckoutDetails`, which differs from the creation response: there is no required `checkout_url`. It validates the checkout ID, lifecycle status, decimal amount, currency, customer, timestamps, and optional payment/charge details. `customer` and `charge` can be null before payment. Unknown additional fields and status strings are preserved for provider compatibility; never treat an unknown status as success. A response for a different checkout ID is rejected.
+
+Use this for server-side reconciliation alongside signed webhooks. Before changing an order, verify the stored checkout/customer/reference, expected amount and currency, and acceptable payment status according to your application policy, then persist the result idempotently. Checkout completion alone does not prove the application has granted access; refunds and later payment events also need handling. Return only your application's minimal confirmation state to the browser, not the full provider response or customer details.
 
 ### `createPortalSession(customerId)`
 
@@ -75,8 +108,10 @@ No in-memory deduplication store is included: it would lose its state on restart
 
 ## Official references
 
-Contracts were checked against the Bachs docs and OpenAPI specification on 2026-09-20:
+Contracts were checked against the Bachs docs and OpenAPI specification on 2026-09-21:
 
+- [Checkout retrieval](https://docs.bachs.io/api-reference/checkout-sessions/get-checkout-session)
+- [Destination charges](https://docs.bachs.io/connect/split-payments/destination)
 - [Overlay checkout](https://docs.bachs.io/guides/checkout/overlay-checkout)
 - [Portal sessions](https://docs.bachs.io/guides/customer-portal/create-portal-session)
 - [Webhook signatures, V2, and rotation](https://docs.bachs.io/guides/webhooks/overview)

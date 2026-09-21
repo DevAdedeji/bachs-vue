@@ -48,10 +48,12 @@ export default defineNuxtModule<ModuleOptions>({
     };
     addPlugin(resolver.resolve('./runtime/plugin'));
     addImports(
-      ['useBachsCheckout', 'useBachsPortal'].map((name) => ({
-        name,
-        from: resolver.resolve('../index.js'),
-      })),
+      ['useBachsCheckout', 'useBachsPortal', 'useBachsPaymentConfirmation'].map(
+        (name) => ({
+          name,
+          from: resolver.resolve('../index.js'),
+        }),
+      ),
     );
     if (options.components)
       addComponent({
